@@ -18,9 +18,7 @@ setup(
     long_description_content_type="text/markdown",
     author="Xin Ren",
     packages=find_packages(exclude=["tests", ".github"]),
-    install_requires=[
-        "dataclasses_json>=0.6"
-    ],
+    install_requires=["dataclass-csv>=1.4.0"],
     extras_require={
         "test": ["pytest>=7.4"]
     },

@@ -1,9 +1,10 @@
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json
+
+from .factor import Factor
 
 
-@dataclass_json
 @dataclass
 class Actor:
 
-    pass
+    name: str
+    factors: list[Factor]

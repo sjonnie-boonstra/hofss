@@ -19,6 +19,8 @@ class TaskType(Enum):
         Returns:
             TaskType: the instance cast from the specified value
         """
+        if isinstance(value, cls):
+            return value
         for member in cls:
             if isinstance(value, str):
                 value = value.lower().strip()
@@ -27,3 +29,6 @@ class TaskType(Enum):
                 elif member.value.lower() == value:
                     return member
         raise ValueError(f"unable to cast value: '{value}' to an instance of '{cls.__name__}'")
+
+    def __str__(self) -> str:
+        return self.name

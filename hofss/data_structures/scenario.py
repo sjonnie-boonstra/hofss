@@ -1,9 +1,8 @@
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json
 
 
-@dataclass_json
 @dataclass
 class Scenario:
 
-    pass
+    name: str
+    description: str

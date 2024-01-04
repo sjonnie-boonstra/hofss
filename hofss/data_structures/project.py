@@ -1,9 +1,9 @@
 from dataclasses import dataclass
-from dataclasses_json import dataclass_json
 
 
-@dataclass_json
 @dataclass
 class Project:
 
-    pass
+    name: str
+    time_budget: str
+    monetary_budget: str
