@@ -1,0 +1,9 @@
+{
+	"autopep8.args": [
+		"--max-line-length",
+		"119",
+	],
+	"editor.rulers": [
+		119
+	],
+}

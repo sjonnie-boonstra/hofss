@@ -1,0 +1,31 @@
+stages:
+  - test
+  - lint
+
+protect_main_branch:
+  stage: .pre
+  script:
+    - 'if [ "$CI_COMMIT_BRANCH" == "main" ]; then exit 1; fi'
+  only:
+    - main
+
+pytest:
+  stage: test
+  image: python:3.11.4
+  script:
+    - pip install ".[test]"
+    - pytest
+  only:
+    - main
+    - merge_requests
+
+pep8_check:
+  stage: lint
+  image: python:3.11.4
+  before_script:
+    - pip install pycodestyle
+  script:
+    - pycodestyle --max-line-length=119 .
+  only:
+    - main
+    - merge_requests
