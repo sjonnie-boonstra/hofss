@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from .organization import Organization
 from .factor import Factor
 
 
@@ -7,4 +8,5 @@ from .factor import Factor
 class Actor:
 
     name: str
+    organization: Organization
     factors: list[Factor]

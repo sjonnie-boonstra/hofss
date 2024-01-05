@@ -9,14 +9,15 @@ class Task:
 
     def __init__(
         self, name: str, factors: list[Factor], assignee: Actor,
-        task_type: [str | TaskType], structure: Structure = None
+        task_type: [str | TaskType], possible_scenarios: list[Scenario],
+        structure: Structure = None
     ) -> None:
 
         self.name = name
         self.factors = factors
         self.assignee = assignee
         self.type = task_type
-        self.structure = structure
+        self.possible_scenarios = possible_scenarios
         return
 
     @property
@@ -47,6 +48,21 @@ class Task:
         return
 
     @property
+    def possible_scenarios(self) -> list[Scenario]:
+        """the task specific possible_scenarios that may occur after a human error occurs"""
+        return self._possible_scenarios
+
+    @possible_scenarios.setter
+    def possible_scenarios(self, values: list[Scenario]):
+        if not isinstance(values, Iterable) or isinstance(values, str):
+            raise TypeError(f"possible_scenarios should be an iterable and not of type str")
+        for i, value in enumerate(values):
+            if not isinstance(value, Scenario):
+                raise TypeError(f"item at index '{i}' is not of type: Scenario; received: {type(value).__name__}")
+        self._possible_scenarios = list(values)
+        return
+
+    @property
     def assignee(self) -> Actor:
         """the Actor to which this task is assigned"""
         return self._assignee
@@ -56,18 +72,6 @@ class Task:
         if not isinstance(value, Actor):
             raise TypeError(f"assignee should be of type: Actor; received: {type(value).__name__}")
         self._assignee = value
-        return
-
-    @property
-    def structure(self) -> Structure:
-        """the structure for which this task is performed"""
-        return self._structure
-
-    @structure.setter
-    def structure(self, value: Structure):
-        if not isinstance(value, Structure) and value is not None:
-            raise TypeError(f"structure should be of type: Structure; received: {type(value).__name__}")
-        self._structure = value
         return
 
     @property
@@ -85,6 +89,54 @@ class Task:
         self._task_type = value
         return
 
-    def do_task(self) -> None | Scenario:
+    def determine_hep(self, factors: list[Factor], base_hep: float = 1e-3) -> float:
+        """determines the Human Error Probability (HEP) for this task given the specified factors
 
-        return
+        Args:
+            factors (list[Factor]): the factors that affect the HEP
+
+        Returns:
+            float: the probability that this task leads to a human error
+        """
+        hep = base_hep
+        for factor in factors:
+            # update the hep based on this factor
+            pass
+        return hep
+
+    def do_task(self) -> None | Scenario:
+        """performs the task: first determines the Human Error Probability (HEP); if an error occurs resolves
+        if the error is found and consequently fixed; if the error is not fixed, determines the scenario that
+        arises from the human error and returns this scenario
+
+        Returns:
+            None | Scenario: the scenario if an error occurs, None if no error occurs or if it is found and corrected
+        """
+        # collect all factors that affect this task
+        factors = [
+            *self.assignee.factors,
+            *self.factors,
+            *self.assignee.organization.factors,
+        ]
+        # determine the HEP
+        hep = self.determine_hep(factors)
+
+        # determine if human error occurs or not
+        human_error_occurs = False
+
+        if not human_error_occurs:
+            return None
+
+        # if this code is reached, a human error occurred
+        # determine if a check resolves the error
+        human_error_discovered = False
+        if human_error_discovered:
+            human_error_corrected = False
+            if human_error_corrected:
+                return None
+
+        # if this code is reached, the human error was not corrected
+        # determine scenario
+        Scenario = None
+
+        return Scenario
