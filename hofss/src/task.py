@@ -10,9 +10,16 @@ class Task:
     def __init__(
         self, name: str, factors: list[Factor], assignee: Actor,
         task_type: [str | TaskType], possible_scenarios: list[Scenario],
-        structure: Structure = None
     ) -> None:
+        """_summary_
 
+        Args:
+            name (str): the name of the task
+            factors (list[Factor]): the task specific factors that affect this task
+            assignee (Actor): the actor to which this task is assigned
+            task_type (str  |  TaskType]): the type of this task
+            possible_scenarios (list[Scenario]): the scenarios that may occur after a human error occurs
+        """
         self.name = name
         self.factors = factors
         self.assignee = assignee
