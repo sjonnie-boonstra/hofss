@@ -96,7 +96,7 @@ class Task:
         self._task_type = value
         return
 
-    def determine_hep(self, factors: list[Factor], base_hep: float = 1e-3) -> float:
+    def determine_hep(self, factors: list[Factor]) -> float:
         """determines the Human Error Probability (HEP) for this task given the specified factors
 
         Args:
@@ -105,7 +105,7 @@ class Task:
         Returns:
             float: the probability that this task leads to a human error
         """
-        hep = base_hep
+        hep = self.task_type.bhep
         for factor in factors:
             # update the hep based on this factor
             pass
