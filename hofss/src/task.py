@@ -88,8 +88,8 @@ class Task:
         task_hep = self.determine_hep()
 
         # determine if human error occurs or not
-        if task_hep < random.uniform(0,1): # no human error occurs
-            return None
+        if task_hep < random.uniform(0, 1):
+            return None  # no human error occurs
 
         # if this code is reached, a human error occurred
         # determine if a check resolves the error
