@@ -2,7 +2,7 @@ from typing import Iterable
 import random
 
 from .structure import Structure
-from ..data_structures import Actor, Factor, TaskType, Scenario
+from ..data_structures import TaskType, Scenario
 
 
 class Task:
@@ -93,9 +93,9 @@ class Task:
 
         # if this code is reached, a human error occurred
         # determine if a check resolves the error
-        human_error_discovered = False
+        human_error_discovered = 0.8 >= random.uniform(0, 1)
         if human_error_discovered:
-            human_error_corrected = False
+            human_error_corrected = 0.9 >= random.uniform(0, 1)
             if human_error_corrected:
                 return None
 

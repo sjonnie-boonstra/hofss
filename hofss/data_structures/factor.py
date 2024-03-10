@@ -20,6 +20,7 @@ class Factor:
     p_positive_effect: float = 0
     "chance a positive effect occurs due to this factor"
     m_neg_lower: float = 0
+    "lower bound of multiplier in case of negative effect"
     m_neg_5: float = 0
     "5th percentile of multiplier in case of negative effect"
     m_neg_50: float = 0
@@ -27,7 +28,9 @@ class Factor:
     m_neg_95: float = 0
     "95th percentile of multiplier in case of negative effect"
     m_neg_upper: float = 0
+    "upper bound of multiplier in case of negative effect"
     m_pos_lower: float = 0
+    "lower bound of multiplier in case of positive effect"
     m_pos_5: float = 0
     "5th percentile of multiplier in case of positive effect"
     m_pos_50: float = 0
@@ -35,20 +38,50 @@ class Factor:
     m_pos_95: float = 0
     "95th percentile of multiplier in case of positive effect"
     m_pos_upper: float = 0
+    "upper bound of multiplier in case of positive effect"
 
     def draw_negative_effect_multiplier(self, p: float) -> float:
-        p_values = [0,0.05,0.5,0.95,1]
+        """draws a multiplier for the negative effect.
+
+        Args:
+            p (float): the probability that determines the draw. Should be between [0,1].
+
+        Returns:
+            float: the drawn multiplier
+        """
+        if p < 0 or p > 1:
+            raise ValueError(f"p must lie between 0 and 1, received value: {p}")
+        p_values = [0, 0.05, 0.5, 0.95, 1]
         multiplier_value = [self.m_neg_lower, self.m_neg_5, self.m_neg_50, self.m_neg_95, self.m_neg_upper]
         return np.interp(p, p_values, multiplier_value)
-    
+
     def draw_positive_effect_multiplier(self, p: float) -> float:
-        p_values = [0,0.05,0.5,0.95,1]
+        """draws a multiplier for the positive effect.
+
+        Args:
+            p (float): the probability that determines the draw. Should be between [0,1].
+
+        Returns:
+            float: the drawn multiplier
+        """
+
+        if p < 0 or p > 1:
+            raise ValueError(f"p must lie between 0 and 1, received value: {p}")
+        p_values = [0, 0.05, 0.5, 0.95, 1]
         multiplier_value = [self.m_neg_lower, self.m_neg_5, self.m_neg_50, self.m_neg_95, self.m_neg_upper]
         return np.interp(p, p_values, multiplier_value)
 
     def draw_multiplier(self) -> float:
-        effect_draw = random.uniform(0,1)
-        multiplier_draw = random.uniform(0,1)
+        """draws a multiplier for this factor.
+
+        First it determines if the effect is positive or negative, then a multiplier is drawn
+        from the respective cumulative distribution function that is defined for this factor.
+
+        Returns:
+            float: the drawn multiplier.
+        """
+        effect_draw = random.uniform(0, 1)
+        multiplier_draw = random.uniform(0, 1)
         if effect_draw < self.p_negative_effect:
             return self.draw_negative_effect_multiplier(multiplier_draw)
         elif effect_draw > (1-self.p_positive_effect):
@@ -82,7 +115,7 @@ class Factor:
                 p_negative_effect=row["Ne"], p_no_effect=row["No"], p_positive_effect=row["Po"],
                 m_neg_5=row["Mneg-5th"], m_neg_50=row["Mneg-50th"], m_neg_95=row["Mneg-95th"],
                 m_pos_5=row["Mpos-5th"], m_pos_50=row["Mpos-50th"], m_pos_95=row["Mpos-95th"],
-                m_neg_lower=row["Mneg-lower"],m_neg_upper=row["Mneg-upper"],
+                m_neg_lower=row["Mneg-lower"], m_neg_upper=row["Mneg-upper"],
                 m_pos_lower=row["Mpos-lower"], m_pos_upper=row["Mpos-upper"]
             ))
         return factors

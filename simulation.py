@@ -1,8 +1,7 @@
 from hofss import *
 
-hofs = Factor.parse_from_file(r"C:\Users\xinren\Desktop\HOFSS\ABM MODEL\model input\hofs_frequencies_and_multipliers.csv")
-task_types = TaskType.parse_from_file(r"C:\Users\xinren\Desktop\HOFSS\ABM MODEL\model input\gtt_nhep_hofs.csv", hofs=hofs)
-
+hofs = Factor.parse_from_file("data/hofs_frequencies_and_multipliers.csv")
+task_types = TaskType.parse_from_file("data/gtt_nhep_hofs.csv", hofs=hofs)
 
 
 # task_1 = Task(
