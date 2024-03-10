@@ -1,0 +1,15 @@
+,GTT,NHEP-EOC,F1,F2,F3,F4,F5,F6,F7,F8,F9,F10,F11,F12,F13,F14
+T1,Diagnosis based on knowledge/experience/situation,1.000E-02,y,n,y,y,n,y,n,y,y,y,y,y,n,n
+T2,Derive value,1.260E-02,y,n,y,y,y,y,n,y,y,y,y,n,n,n
+T3,Consult code,1.500E-02,y,n,y,y,y,y,n,y,y,y,y,n,n,n
+T4,Mechanical schematization,3.000E-02,y,n,y,y,n,y,n,y,y,y,y,y,n,n
+T5,Calculation,1.000E-02,y,n,y,y,n,n,n,y,y,y,y,y,y,n
+T6,Comparison/ranking,4.190E-04,y,y,y,y,y,y,n,n,y,y,n,y,n,n
+T7,Interaction with design software,2.224E-03,y,n,y,y,n,y,n,y,y,y,y,n,y,n
+T8,Documenting the design and prepare specifications,1.000E-02,y,n,y,y,y,y,n,y,y,y,y,y,n,n
+T9,Follow instructions and act,6.000E-03,y,y,y,y,n,y,n,y,n,y,n,n,y,y
+T10,Consult drawings and specifications,4.259E-04,y,y,y,y,y,y,n,y,n,y,y,y,n,n
+T11,Measurement,1.869E-04,y,n,y,y,n,n,n,y,n,y,n,n,y,y
+T12,Interaction with hardware equipment (tools/machine),1.720E-04,y,y,y,y,n,n,n,y,n,y,n,n,y,y
+T13,Communication,6.000E-03,y,y,y,y,y,y,y,n,n,y,n,y,n,n
+T14,Checking/inspection,1.095E-03,y,y,y,y,n,y,n,y,n,y,y,y,n,n
