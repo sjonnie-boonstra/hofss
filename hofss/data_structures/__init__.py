@@ -1,5 +1,5 @@
 from .factor import Factor
 from .parameter import Parameter
-from .scenario import Scenario
+from .factor_level import FactorLevel
 
 from .task_type import TaskType

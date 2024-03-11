@@ -1,14 +1,15 @@
-from typing import Iterable
-import time
-import random
+import os
+from typing import Iterable, Callable
+import numpy as np
+import pandas as pd
 
 from ..data_structures import Parameter, Scenario
-from .failure_mode import FailureMode
+from ..failure_modes import failure_mode_functions
 
 
 class Structure:
 
-    def __init__(self, name: str, parameters: list[Parameter], failure_modes: list[FailureMode]) -> None:
+    def __init__(self, name: str, parameters: list[Parameter], failure_modes: list[callable]) -> None:
         self.name = name
         self.parameters = parameters
         self.failure_modes = failure_modes
@@ -42,17 +43,17 @@ class Structure:
         return
 
     @property
-    def failure_modes(self) -> list[FailureMode]:
+    def failure_modes(self) -> list[callable]:
         """the failure modes that affect this structure"""
         return self._failure_modes
 
     @failure_modes.setter
-    def failure_modes(self, values: list[FailureMode]):
+    def failure_modes(self, values: list[callable]):
         if not isinstance(values, Iterable) or isinstance(values, str):
             raise TypeError(f"failure_modes should be an iterable and not of type str")
         for i, value in enumerate(values):
-            if not isinstance(value, FailureMode):
-                raise TypeError(f"item at index '{i}' is not of type: FailureMode; received: {type(value).__name__}")
+            if not isinstance(value, Callable):
+                raise TypeError(f"item at index '{i}' is not callable; received type: {type(value).__name__}")
         self._failure_modes = list(values)
         return
 
@@ -69,26 +70,20 @@ class Structure:
 
         return
 
-    def draw_parameter_values(self, seed: int) -> dict[str, float]:
+    def draw_parameter_values(self, n: int = 1) -> dict[str, list[float]]:
         """draws parameter values for this structures from this structure's
-        parameter definitionsusing the provided Random Number Generator seed
+        parameter definitions using
 
         Args:
-            seed (int): the seed to use to draw a random number from the parameter distributions
+            n (int): number of draws per parameter.
 
         Returns:
-            dict[str, float]: a dictionary with the parameter values by their respective names
+            dict[str, np.array[float]]: a dictionary with a numpy array of values (size = n)
+            by their respective parameter's names
         """
-        random.seed(seed)
-        parameter_values = {}
-        for parameter in self.parameters:
-            parameter_value = None  # draw number from the parameter distribution here
-            parameter_values[parameter.name] = parameter_value
-        return parameter_values
+        return {p.name: p.draw(n) for p in self.parameters}
 
-    def calculate_failure_probabilities(
-        self, number_of_iterations: int = 1e6, monte_carlo_seed: int = None
-    ) -> dict[str, float]:
+    def calculate_failure_probabilities(self, number_of_iterations: int = 1e6) -> dict[str, float]:
         """calculates the failure probabilities for each failure mode through a Monte Carlo simulation
 
         Args:
@@ -101,29 +96,72 @@ class Structure:
             dict[str, float]: a dictionary with the failure probability per failure mode
         """
 
-        # create the randomness in the Monte Carlo simulation
-        if monte_carlo_seed is not None:
-            monte_carlo_seed = time.time()
-        random.seed(monte_carlo_seed)
+        # draw the parameter values
+        parameter_values = self.draw_parameter_values(number_of_iterations)
 
-        # create a list of seeds to draw parameter values
-        draw_seeds = [random.randint(1, 1e10) for _ in range(number_of_iterations)]
-        random.shuffle(draw_seeds)
-
-        # compute the failure criterions by drawing parameters and using
-        # them to calculate this criterion for each failure mode
-        failure_simulations = []
-        for draw_seed in draw_seeds:
-            failure_criterions = []
-            for failure_mode in self.failure_modes:
-                parameter_values = self.draw_parameter_values(draw_seed)
-                failure_criterions.append(failure_mode.calculate_failure_criterion(**parameter_values))
-            failure_simulations.append(failure_criterions)
-
-        # calculate the failure probabilities for each failure mode
-        failure_probabilities = {}
+        # determine if failure occured per iteration and per failure mode, and calculate the
+        # failure probability per mode and for the total
+        failure_probability_by_mode = {}
+        total_failure = None
         for failure_mode in self.failure_modes:
-            # calculate the probability of this failure mode
-            pass
-        # calculate the total failure probability considering all failure modes
-        return failure_probabilities
+            failure_criteria = failure_mode(**parameter_values)
+            failure_occured = failure_criteria < 0
+            failure_probability_by_mode[failure_mode.__name__] = np.sum(failure_occured, axis=0)
+            if total_failure is None:
+                total_failure = failure_occured
+            else:
+                total_failure = np.logical_or(total_failure, failure_occured)
+
+        failure_probability_by_mode["total"] = np.sum(total_failure, axis=0)
+
+        return failure_probability_by_mode
+
+    @classmethod
+    def parse_from_file(cls, structure_file_path: str, failure_functions: list[callable] = failure_mode_functions):
+        """parses a structure from a file.
+
+        The data file should be comma separated (.CSV) and have the following header:
+
+            `parameter,failure_mechanisms,mean,standard_deviation,distribution_type`
+
+        Args:
+            structure_file_path (str): the path to the file containing the structure data.
+            failure_functions (list[callable], optional): a list of the failure mode functions that may be.
+            assigned in the structure (as specified by the structure file). Defaults to the failure mode
+            functions defined within this library.
+
+        Raises:
+            RuntimeError: if a failure mode specified in the structucture file cannot
+            be found among the failure functions.
+
+        Returns:
+            Structure: the structure that was parsed from the structure file.
+        """
+        structure_data = pd.read_csv(structure_file_path, header=0, index_col=0)
+        parameters = []
+        structure_failure_modes = {}
+        for index, row in structure_data.iterrows():
+            failure_mechanisms = row["failure_mechanisms"].strip("[").strip("]").split(";")
+            for failure_mechanism in failure_mechanisms:
+                failure_mechanism = failure_mechanism.strip()
+                if failure_mechanism in structure_failure_modes:
+                    continue
+                failure_mode_function = None
+                for function in failure_functions:
+                    if function.__name__.strip() == failure_mechanism:
+                        failure_mode_function = function
+                        break
+
+                if failure_mode_function is None:
+                    raise RuntimeError(f"unable to find function for failure mechanism: {failure_mechanism}")
+                structure_failure_modes[failure_mechanism] = failure_mode_function
+            parameters.append(Parameter(
+                name=index, value=row["mean"], standard_deviation=row["standard_deviation"],
+                distribution_function=getattr(np.random, row["distribution_type"])
+            ))
+
+        structure = cls(
+            name=os.path.splitext(os.path.basename(structure_file_path))[0],
+            parameters=parameters, failure_modes=list(structure_failure_modes.values())
+        )
+        return structure

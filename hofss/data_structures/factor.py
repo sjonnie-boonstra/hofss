@@ -3,6 +3,8 @@ import random
 import pandas as pd
 import numpy as np
 
+from .factor_level import FactorLevel
+
 
 @dataclass
 class Factor:
@@ -82,12 +84,24 @@ class Factor:
         """
         effect_draw = random.uniform(0, 1)
         multiplier_draw = random.uniform(0, 1)
-        if effect_draw < self.p_negative_effect:
-            return self.draw_negative_effect_multiplier(multiplier_draw)
-        elif effect_draw > (1-self.p_positive_effect):
-            return self.draw_positive_effect_multiplier(multiplier_draw)
+
+        factor_level = None
+        if multiplier_draw < 0.05:
+            factor_level = FactorLevel.OBVIOUS
+        elif multiplier_draw < 0.50:
+            factor_level = FactorLevel.NOMINAL
+        elif multiplier_draw < 0.95:
+            factor_level = FactorLevel.MODERATE
         else:
-            return 1
+            factor_level = FactorLevel.HIGH
+
+        effect = 1  # if no effect takes place, the value is 1
+        if effect_draw < self.p_negative_effect:
+            effect = self.draw_negative_effect_multiplier(multiplier_draw)
+        elif effect_draw > (1-self.p_positive_effect):
+            effect = self.draw_positive_effect_multiplier(multiplier_draw)
+
+        return effect, factor_level
 
     @classmethod
     def parse_from_file(cls, data_file_path):

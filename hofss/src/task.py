@@ -1,8 +1,8 @@
 from typing import Iterable
 import random
+import pandas as pd
 
-from .structure import Structure
-from ..data_structures import TaskType, Scenario
+from ..data_structures import TaskType, Scenario, FactorLevel
 
 
 class Task:
@@ -65,16 +65,24 @@ class Task:
         self._task_type = value
         return
 
-    def determine_hep(self) -> float:
+    def determine_hep(self) -> tuple[float, FactorLevel]:
         """determines the Human Error Probability (HEP) for this task given the task's factors
 
         Returns:
             float: the probability that this task leads to a human error
         """
         composite_multiplier = 1
+        complexity_level = None
         for factor in self.task_type.factors:
-            composite_multiplier *= factor.draw_multiplier()
-        return (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
+            factor_multiplier, factor_level = factor.draw_multiplier()
+            composite_multiplier *= factor_multiplier
+            if "complexity" in factor.description:
+                complexity_level = factor_level
+        if complexity_level is None:
+            raise RuntimeError("unable to determine complexity level when determining HEP")
+
+        hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
+        return hep, complexity_level
 
     def do_task(self) -> None | Scenario:
         """performs the task: first determines the Human Error Probability (HEP); if an error occurs resolves
@@ -85,7 +93,7 @@ class Task:
             None | Scenario: the scenario if an error occurs, None if no error occurs or if it is found and corrected
         """
         # determine the HEP
-        task_hep = self.determine_hep()
+        task_hep, complexity_level = self.determine_hep()
 
         # determine if human error occurs or not
         if task_hep < random.uniform(0, 1):
@@ -103,4 +111,40 @@ class Task:
         # determine scenario
         Scenario = None
 
-        return Scenario
+        return Scenario, complexity_level
+
+    @classmethod
+    def parse_from_file(cls, task_file_path: str, task_types: list[TaskType], scenarios: list[Scenario]):
+
+        task_data = pd.read_csv(task_file_path, header=0, index_col=0)
+        tasks = []
+        for index, row in task_data:
+
+            # parse the names and probabilities of the scenarios assigned to this task in case an error occurs
+            scenarios_and_probabilities = map(
+                lambda x: tuple(x.split("&")),
+                row["scenarios_and_probabilities"].strip("[").strip("]").split(";")
+            )
+            scenario_names, scenario_probabilities = zip(*scenarios_and_probabilities)
+
+            # check if the sum of all scenario probabilities is 1
+            if sum(scenario_probabilities) != 1.0:
+                raise RuntimeError(
+                    f"sum of scenario possibilties for taks '{index}' should be 1, is: {sum(scenario_probabilities)}"
+                )
+
+            # find the matching scenario instance with each scenario name
+            scenarios = []
+            for scenario_name in scenario_names:
+                scenario_match = None
+
+                if scenario_match is None:
+                    raise RuntimeError(f"unable to find scenario '{scenario_name}' that is defined for task '{index}'")
+                scenarios.append(scenario_match)
+
+            tasks.append(cls(
+                name=index, task_type=task_types, scenarios=scenarios,
+                scenario_probabilities=list(scenario_probabilities)
+            ))
+
+        return tasks
