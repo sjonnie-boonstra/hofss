@@ -15,12 +15,12 @@ scenarios = Scenario.parse_from_file("data/scenarios.csv")
 tasks = Task.parse_from_file("data/tasks.csv", task_types, scenarios)
 
 # # run the simulation
-# failure_probabily_dataframes = []
-# for task in tasks:
-#     scenario, complexity_level = task.do_task()
-#     structure.update_parameters(scenario, complexity_level)
-#     failure_probabilities = structure.calculate_failure_probabilities(number_of_iterations=1e6)
+failure_probabily_dataframes = []
+for task in tasks:
+    scenario, complexity_level = task.do_task()
+    structure.update_parameters(scenario, complexity_level)
+    failure_probabilities = structure.calculate_failure_probabilities(number_of_iterations=1e6)
 
-# # store the result
-# collective_df = pd.concat(failure_probabily_dataframes)
-# collective_df.to_csv(f"results/sim_{seed}.csv")
+# store the result
+collective_df = pd.concat(failure_probabily_dataframes)
+collective_df.to_csv(f"results/sim_{seed}.csv")
