@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass, field
 import pandas as pd
 
@@ -18,7 +19,7 @@ class TaskType:
     "the nominal Human Error Probability (HEP) of a task of this type"
 
     @classmethod
-    def parse_from_file(cls, data_file_path: str, hofs: dict[str, Factor]):
+    def parse_from_file(cls, data_file_path: str, hofs: dict[str, Factor]) -> list[TaskType]:
         """parses all task types from a data file.
 
         The data file should be comma separated (.CSV) and have the following header:

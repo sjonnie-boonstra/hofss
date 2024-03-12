@@ -1,0 +1,3 @@
+name,description,affected_parameters
+S1,scenario_1,[alpha;beta]
+S2,scenario_2,[theta_E]

@@ -1,0 +1,2 @@
+task_name,task_type,scenarios_and_probabilities
+task_1,T1,[S1&0.5;S2&0.5]

@@ -1,3 +1,4 @@
+from __future__ import annotations
 from dataclasses import dataclass
 import random
 import pandas as pd
@@ -104,7 +105,7 @@ class Factor:
         return effect, factor_level
 
     @classmethod
-    def parse_from_file(cls, data_file_path):
+    def parse_from_file(cls, data_file_path) -> list[Factor]:
         """parses all factors from a data file.
 
         The data file should be comma separated (.CSV) and have the following header:

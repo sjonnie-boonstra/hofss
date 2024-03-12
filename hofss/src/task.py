@@ -1,15 +1,17 @@
+from __future__ import annotations
 from typing import Iterable
 import random
 import pandas as pd
 
-from ..data_structures import TaskType, Scenario, FactorLevel
+from .scenario import Scenario
+from ..data_structures import TaskType, FactorLevel
 
 
 class Task:
     """A task within the design or construction of a structure"""
 
     def __init__(
-        self, name: str, task_type: TaskType, possible_scenarios: list[Scenario],
+        self, name: str, task_type: TaskType, scenarios: list[Scenario], scenario_probabilities: list[float]
     ) -> None:
         """
         Args:
@@ -20,7 +22,8 @@ class Task:
         """
         self.name = name
         self.type = task_type
-        self.possible_scenarios = possible_scenarios
+        self.scenarios = scenarios
+        self.scenario_probabilities = scenario_probabilities
         return
 
     @property
@@ -36,21 +39,6 @@ class Task:
         return
 
     @property
-    def possible_scenarios(self) -> list[Scenario]:
-        """the task specific possible_scenarios that may occur after a human error occurs"""
-        return self._possible_scenarios
-
-    @possible_scenarios.setter
-    def possible_scenarios(self, values: list[Scenario]):
-        if not isinstance(values, Iterable) or isinstance(values, str):
-            raise TypeError(f"possible_scenarios should be an iterable and not of type str")
-        for i, value in enumerate(values):
-            if not isinstance(value, Scenario):
-                raise TypeError(f"item at index '{i}' is not of type: Scenario; received: {type(value).__name__}")
-        self._possible_scenarios = list(values)
-        return
-
-    @property
     def task_type(self) -> TaskType:
         """the type of this task"""
         return self._task_type
@@ -63,6 +51,39 @@ class Task:
             except Exception as err:
                 raise TypeError(f"task_type should be castable to enum: TaskType; received error:\n{repr(err)}")
         self._task_type = value
+        return
+
+    @property
+    def scenarios(self) -> list[Scenario]:
+        """the task specific scenarios that may occur after a human error occurs"""
+        return self._scenarios
+
+    @scenarios.setter
+    def scenarios(self, values: list[Scenario]):
+        if not isinstance(values, Iterable) or isinstance(values, str):
+            raise TypeError(f"scenarios should be an iterable and not of type {type(values).__name__}")
+        for i, value in enumerate(values):
+            if not isinstance(value, Scenario):
+                raise TypeError(f"item at index '{i}' is not of type: Scenario; received: {type(value).__name__}")
+        self._scenarios = list(values)
+        return
+
+    @property
+    def scenario_possibilities(self) -> list[float]:
+        """the possibilites of each respective scenario"""
+        return self._scenario_possibilities
+
+    @scenario_possibilities.setter
+    def scenario_possibilities(self, values: list[float]):
+        if not isinstance(values, Iterable) or isinstance(values, str):
+            raise TypeError(f"scenario_probabilities should be an iterable and not of type {type(values).__name__}")
+        scenario_probabilities = []
+        for i, value in enumerate(values):
+            try:
+                scenario_probabilities.append(float(value))
+            except:
+                raise TypeError(f"item at index '{i}' can't be cast to a float; received type: {type(value).__name__}")
+        self._scenarios = scenario_probabilities
         return
 
     def determine_hep(self) -> tuple[float, FactorLevel]:
@@ -114,11 +135,24 @@ class Task:
         return Scenario, complexity_level
 
     @classmethod
-    def parse_from_file(cls, task_file_path: str, task_types: list[TaskType], scenarios: list[Scenario]):
+    def parse_from_file(
+        cls, task_file_path: str, project_task_types: list[TaskType], project_scenarios: list[Scenario]
+    ) -> list[Task]:
 
         task_data = pd.read_csv(task_file_path, header=0, index_col=0)
         tasks = []
-        for index, row in task_data:
+        for index, row in task_data.iterrows():
+
+            # find the instance of the task type from the specified list of task types
+            task_type_name = row["task_type"]
+            task_type = None
+            for project_task_type in project_task_types:
+                if project_task_type.name == task_type_name:
+                    task_type = project_task_type
+                    break
+
+            if task_type is None:
+                raise ValueError(f"unable to find task type: '{task_type_name}' specified for task '{index}'")
 
             # parse the names and probabilities of the scenarios assigned to this task in case an error occurs
             scenarios_and_probabilities = map(
@@ -126,6 +160,8 @@ class Task:
                 row["scenarios_and_probabilities"].strip("[").strip("]").split(";")
             )
             scenario_names, scenario_probabilities = zip(*scenarios_and_probabilities)
+
+            scenario_probabilities = [float(p) for p in scenario_probabilities]
 
             # check if the sum of all scenario probabilities is 1
             if sum(scenario_probabilities) != 1.0:
@@ -138,12 +174,16 @@ class Task:
             for scenario_name in scenario_names:
                 scenario_match = None
 
+                for project_scenario in project_scenarios:
+                    if project_scenario.name == scenario_name:
+                        scenario_match = project_scenario
+                        break
                 if scenario_match is None:
                     raise RuntimeError(f"unable to find scenario '{scenario_name}' that is defined for task '{index}'")
                 scenarios.append(scenario_match)
 
             tasks.append(cls(
-                name=index, task_type=task_types, scenarios=scenarios,
+                name=index, task_type=task_type, scenarios=scenarios,
                 scenario_probabilities=list(scenario_probabilities)
             ))
 

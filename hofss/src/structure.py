@@ -1,9 +1,11 @@
+from __future__ import annotations
 import os
 from typing import Iterable, Callable
 import numpy as np
 import pandas as pd
 
-from ..data_structures import Parameter, Scenario
+from .scenario import Scenario
+from ..data_structures import Parameter
 from ..failure_modes import failure_mode_functions
 
 
@@ -117,7 +119,9 @@ class Structure:
         return failure_probability_by_mode
 
     @classmethod
-    def parse_from_file(cls, structure_file_path: str, failure_functions: list[callable] = failure_mode_functions):
+    def parse_from_file(
+        cls, structure_file_path: str, failure_functions: list[callable] = failure_mode_functions
+    ) -> Structure:
         """parses a structure from a file.
 
         The data file should be comma separated (.CSV) and have the following header:
