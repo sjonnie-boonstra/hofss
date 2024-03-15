@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from .scenario import Scenario
-from ..data_structures import Parameter
+from ..data_structures import Parameter, FactorLevel
 from ..failure_modes import failure_mode_functions
 
 
@@ -59,13 +59,13 @@ class Structure:
         self._failure_modes = list(values)
         return
 
-    def update_parameters(self, scenario: Scenario) -> None:
+    def update_parameters(self, task_result: pd.Series) -> None:
         """updates the parameters according to the provided scnario
 
         Args:
             scenario (Scenario): the scenario that happened after a human error has occured
         """
-        if scenario is None:
+        if task_result["scenario"] is None:
             return
 
         # use the scenario to update this structure's prameters
@@ -103,20 +103,21 @@ class Structure:
 
         # determine if failure occured per iteration and per failure mode, and calculate the
         # failure probability per mode and for the total
-        failure_probability_by_mode = {}
+        failures_by_mode = {}
         total_failure = None
         for failure_mode in self.failure_modes:
             failure_criteria = failure_mode(**parameter_values)
             failure_occured = failure_criteria < 0
-            failure_probability_by_mode[failure_mode.__name__] = np.sum(failure_occured, axis=0)
+            failures_by_mode[failure_mode.__name__] = np.sum(failure_occured, axis=0)
             if total_failure is None:
                 total_failure = failure_occured
             else:
                 total_failure = np.logical_or(total_failure, failure_occured)
 
-        failure_probability_by_mode["total"] = np.sum(total_failure, axis=0)
+        failures_by_mode["total"] = np.sum(total_failure, axis=0)
+        failure_probability_by_mode = {k: v / number_of_iterations for k, v in failures_by_mode.items()}
 
-        return failure_probability_by_mode
+        return pd.Series(failure_probability_by_mode)
 
     @classmethod
     def parse_from_file(

@@ -21,7 +21,7 @@ class Task:
             possible_scenarios (list[Scenario]): the scenarios that may occur after a human error occurs
         """
         self.name = name
-        self.type = task_type
+        self.task_type = task_type
         self.scenarios = scenarios
         self.scenario_probabilities = scenario_probabilities
         return
@@ -105,7 +105,7 @@ class Task:
         hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
         return hep, complexity_level
 
-    def do_task(self) -> None | Scenario:
+    def do_task(self) -> tuple[None, None, bool] | tuple[Scenario, FactorLevel, bool]:
         """performs the task: first determines the Human Error Probability (HEP); if an error occurs resolves
         if the error is found and consequently fixed; if the error is not fixed, determines the scenario that
         arises from the human error and returns this scenario
@@ -115,31 +115,47 @@ class Task:
         """
         # determine the HEP
         task_hep, complexity_level = self.determine_hep()
+        task_result = {
+            "task": self.name, "hep": task_hep, "complexity_level": complexity_level.value,
+            "human_error_occured": False, "error_discovered": False, "error_corrected": False,
+            "scenario": None
+        }
 
         # determine if human error occurs or not
         if task_hep < random.uniform(0, 1):
-            return None  # no human error occurs
+            return pd.Series(task_result)  # no human error occurs
 
         # if this code is reached, a human error occurred
+        task_result["human_error_occured"] = True
+
         # determine if a check resolves the error
         human_error_discovered = 0.8 >= random.uniform(0, 1)
+        task_result["error_discovered"] = human_error_discovered
         if human_error_discovered:
             human_error_corrected = 0.9 >= random.uniform(0, 1)
+            task_result["error_corrected"] = human_error_corrected
             if human_error_corrected:
-                return None
+                return pd.Series(task_result)
 
         # if this code is reached, the human error was not corrected
         # determine scenario
-        Scenario = None
+        scenario_draw = random.uniform(0, 1)
+        probability_sum = 0
+        scenario = None
+        for scenario, probability in zip(self.scenarios, self.scenario_probabilities):
+            probability_sum += probability
+            if scenario_draw < probability_sum:
+                break
 
-        return Scenario, complexity_level
+        task_result["scenario"] = scenario
+        return pd.Series(task_result)
 
     @classmethod
     def parse_from_file(
         cls, task_file_path: str, project_task_types: list[TaskType], project_scenarios: list[Scenario]
     ) -> list[Task]:
 
-        task_data = pd.read_csv(task_file_path, header=0, index_col=0)
+        task_data = pd.read_csv(task_file_path, header=0, index_col=0).fillna("")
         tasks = []
         for index, row in task_data.iterrows():
 
@@ -155,16 +171,16 @@ class Task:
                 raise ValueError(f"unable to find task type: '{task_type_name}' specified for task '{index}'")
 
             # parse the names and probabilities of the scenarios assigned to this task in case an error occurs
-            scenarios_and_probabilities = map(
-                lambda x: tuple(x.split("&")),
-                row["scenarios_and_probabilities"].strip("[").strip("]").split(";")
-            )
-            scenario_names, scenario_probabilities = zip(*scenarios_and_probabilities)
-
-            scenario_probabilities = [float(p) for p in scenario_probabilities]
+            scenario_names, scenario_probabilities = [], []
+            for field in row["scenarios_and_probabilities"].split(";"):
+                if field == "":
+                    continue
+                scenario_name, scenario_probability = field.split("&")
+                scenario_names.append(scenario_name)
+                scenario_probabilities.append(float(scenario_probability))
 
             # check if the sum of all scenario probabilities is 1
-            if sum(scenario_probabilities) != 1.0:
+            if round(sum(scenario_probabilities), 3) != 1.0 and len(scenario_probabilities) != 0:
                 raise RuntimeError(
                     f"sum of scenario possibilties for taks '{index}' should be 1, is: {sum(scenario_probabilities)}"
                 )

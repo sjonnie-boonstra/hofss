@@ -25,4 +25,4 @@ class Parameter:
         Returns:
             np.ndarray[float]: a numpy array of n-values drawn for this parameter
         """
-        return np.array(self.distribution_function(self.value, self.standard_deviation, n))
+        return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
