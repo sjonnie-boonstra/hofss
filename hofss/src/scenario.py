@@ -2,6 +2,7 @@ from __future__ import annotations
 import dataclasses
 from copy import copy
 import pandas as pd
+import numpy as np
 
 from ..data_structures import Parameter, FactorLevel
 
@@ -24,15 +25,24 @@ class Scenario:
     def update_parameters(self, initial_parameters: list[Parameter], complexity_level: FactorLevel) -> Parameter:
         parameters = copy(initial_parameters)
 
-        affected_parameters = copy(self.affected_parameters)
+        deviating_multiplier = np.random.lognormal(0, complexity_level.value)
+        increasing_multiplier = deviating_multiplier if deviating_multiplier > 1 else 1.0 / deviating_multiplier
+        decreasing_multiplier = 1.0 / increasing_multiplier
+        print(deviating_multiplier)
         for i, parameter in enumerate(parameters):
-            if not parameter.name in affected_parameters:
+            error_multiplier = None
+            if parameter.name in self.deviating_parameters:
+                error_multiplier = deviating_multiplier
+            elif parameter.name in self.increasing_parameters:
+                error_multiplier = increasing_multiplier
+            elif parameter.name in self.decreasing_parameters:
+                error_multiplier = decreasing_multiplier
+            else:
                 continue
-            affected_parameters.remove(parameter)
 
-            # determine new value of parameter
+            # update the parameter
             updated_parameter = dataclasses.replace(parameter)
-            # >>>>>>>>>>>>>>> MAGIC HERE <<<<<<<<<<<<<<<<<<<<<
+            updated_parameter.value *= error_multiplier
             parameters[i] = updated_parameter
         return parameters
 
@@ -51,3 +61,6 @@ class Scenario:
             ))
 
         return scenarios
+
+    def __str__(self) -> str:
+        return self.name

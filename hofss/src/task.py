@@ -2,6 +2,7 @@ from __future__ import annotations
 from typing import Iterable
 import random
 import pandas as pd
+import numpy as np
 
 from .scenario import Scenario
 from ..data_structures import TaskType, FactorLevel
@@ -86,26 +87,34 @@ class Task:
         self._scenarios = scenario_probabilities
         return
 
-    def determine_hep(self) -> tuple[float, FactorLevel]:
+    def determine_hep(self) -> pd.Series:
         """determines the Human Error Probability (HEP) for this task given the task's factors
 
         Returns:
             float: the probability that this task leads to a human error
         """
-        composite_multiplier = 1
+        hep_data = {}
+        multiplier_values = []
         complexity_level = None
         for factor in self.task_type.factors:
             factor_multiplier, factor_level = factor.draw_multiplier()
-            composite_multiplier *= factor_multiplier
+            hep_data[f"{factor.name}_multiplier"] = factor_multiplier
+            multiplier_values.append(factor_multiplier)
             if "complexity" in factor.description:
                 complexity_level = factor_level
+
         if complexity_level is None:
             raise RuntimeError("unable to determine complexity level when determining HEP")
+        hep_data["complexity_level"] = complexity_level
 
+        multipliers_values = np.array(multiplier_values)
+        composite_multiplier = multipliers_values.prod()**(1.0/len(multipliers_values))
         hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
-        return hep, complexity_level
 
-    def do_task(self) -> tuple[None, None, bool] | tuple[Scenario, FactorLevel, bool]:
+        hep_data["hep"] = hep
+        return hep_data
+
+    def do_task(self) -> pd.Series:
         """performs the task: first determines the Human Error Probability (HEP); if an error occurs resolves
         if the error is found and consequently fixed; if the error is not fixed, determines the scenario that
         arises from the human error and returns this scenario
@@ -113,13 +122,16 @@ class Task:
         Returns:
             None | Scenario: the scenario if an error occurs, None if no error occurs or if it is found and corrected
         """
-        # determine the HEP
-        task_hep, complexity_level = self.determine_hep()
+        # initiate task result dict with default values
         task_result = {
-            "task": self.name, "hep": task_hep, "complexity_level": complexity_level.value,
-            "human_error_occured": False, "error_discovered": False, "error_corrected": False,
+            "task": self.name, "human_error_occured": False, "error_discovered": False, "error_corrected": False,
             "scenario": None
         }
+
+        # determine the HEP
+        hep_data = self.determine_hep()
+        task_hep = hep_data["hep"]
+        task_result.update(hep_data)
 
         # determine if human error occurs or not
         if task_hep < random.uniform(0, 1):

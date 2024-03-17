@@ -2,11 +2,11 @@ task_name,task_content,task_type,scenarios_and_probabilities
 D1,Determine slab span,T1,D1-S1&0.5;D1-S2&0.5
 D2,Determine slab width,T1,D2-S1&0.5;D2-S2&0.5
 D3,Determine structural scheme,T4,D3-S1&1
-D4,Occupancy of the structure,T1,
-D5,Fire rating,T2,
-D6,Sound transmission,T2,
+D4,Occupancy of the structure,T1,D4-S1&0.5;D4-S2&0.5
+D5,Fire rating,T2,D5-S1&0.5;D5-S2&0.5
+D6,Sound transmission,T2,D6-S1&0.5;D6-S2&0.5
 D7,Exposure classification and durability requirements,T2,D7-S1&0.5;D7-S2&0.5
-D8,Other special design criteria,T1,
+D8,Other special design criteria,T1,D8-S1&0.5;D8-S2&0.5
 D9,List all load cases,T3,D9-S1&0.3;D9-S2&0.1;D9-S3&0.6
 D10,Inventory of load distribution,T4,D10-S1&0.4;D10-S2&0.4;D10-S3&0.2
 D11,List all critical combinations of load cases,T4,D11-S1&0.5;D11-S2&0.5
@@ -17,22 +17,22 @@ D15,Determine material strength partial safety factor,T1,D15-S1&0.5;D15-S2&0.5
 D16,Determine slab height with design rule,T1,D16-S1&0.5;D16-S2&0.5
 D17,Calculate self weight,T5,D17-S1&0.5;D17-S2&0.5
 D18,Calculate design moment,T5,D18-S1&0.5;D18-S2&0.5
-D19,Calculate shear forces,T5,
+D19,Calculate shear forces,T5,D19-S1&0.5;D19-S2&0.5
 D20,Assume reinforcement diameter,T1,D20-S1&0.5;D20-S2&0.5
 D21,Determine concrete cover,T1,D21-S1&0.5;D21-S2&0.5
 D22,Estimate effective height,T1,D22-S1&0.5;D22-S2&0.5
 D23,Calculate required reinforcement area,T5,D23-S1&0.5;D23-S2&0.5
-D24,Determine minimum reinforcement area,T2,
-D25,Determine maximum reinforcement area,T2,
-D26,Check minimum reinforcement area if necessary increase As to As_min,T6,
+D24,Determine minimum reinforcement area,T2,D24-S1&0.5;D24-S2&0.5
+D25,Determine maximum reinforcement area,T2,D25-S1&0.5;D25-S2&0.5
+D26,Check minimum reinforcement area if necessary increase As to As_min,T6,D26-S1&0.5;D26-S2&0.5
 D27,Round up As to a practical value,T3,D27-S1&0.5;D27-S2&0.5
 D28,Check maximum reinforcement area if necessary increase floor height or concrete quality,T6,D28-S1&0.5;D28-S2&0.5
-D29,Calculate shear force resistance,T5,
+D29,Calculate shear force resistance,T5,D29-S1&0.5;D29-S2&0.5
 D30,Calculate effective height,T5,D30-S1&0.5;D30-S2&0.5
 D31,Calculate compression zone height,T5,D31-S1&0.5;D31-S2&0.5
 D32,Calculate  the moment arm of internal force resultants,T5,D32-S1&0.5;D32-S2&0.5
 D33,Calculate moment resistance,T5,D33-S1&0.5;D33-S2&0.5
-D34,Check if MRd is larger than Med,T6,
+D34,Check if MRd is larger than Med,T6,D34-S1&0.5;D34-S2&0.5
 D35,Calculate deflection,T5,
 D36,Calculate crack width,T5,
 D37,Determine work loads,T1,
@@ -91,13 +91,13 @@ C29,Consult design and specifications,T10,C29-S1&1
 C30,Transport reinforcement to floor,T9,
 C31,Set out reinforcement dimensions,T11,C31-S1&0.5;C31-S2&0.5
 C32,Place reinforcement,T9,C32-S1&1
-C33,Bind welding-mesh reinforcement,T9,
+C33,Bind welding-mesh reinforcement,T9,C33-S1&0.2;C33-S2&0.8
 C34,Bind additional reinforcement,T9,C34-S1&0.2;C34-S2&0.8
-C35,Consult design and specifications,T10,
+C35,Consult design and specifications,T10,C35-S1&1
 C36,Prepare concrete,T9,C36-S1&0.5;C36-S2&0.5
 C37,Place mould,T9,
 C38,Prepare machine,T12,
 C39,Pour concrete to floor area,T9,C39-S1&0.5;C39-S2&0.5
 C40,Compact concrete and level surface,T9,
 C41,Cure and finish concrete,T9,C41-S1&0.5;C41-S2&0.5
-C42,Remove supporting structures,T9,
+C42,Remove supporting structures,T9,C42-S1&1

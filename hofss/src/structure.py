@@ -65,11 +65,14 @@ class Structure:
         Args:
             scenario (Scenario): the scenario that happened after a human error has occured
         """
+        scenario: Scenario = task_result["scenario"]
         if task_result["scenario"] is None:
             return
 
-        # use the scenario to update this structure's prameters
+        complexity_level: FactorLevel = task_result["complexity_level"]
 
+        # use the scenario to update this structure's prameters
+        self.parameters = scenario.update_parameters(self.parameters, complexity_level)
         return
 
     def draw_parameter_values(self, n: int = 1) -> dict[str, list[float]]:
