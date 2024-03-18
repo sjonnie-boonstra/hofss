@@ -22,17 +22,20 @@ class Scenario:
         self.deviating_parameters = deviating_parameters
         return
 
-    def update_parameters(self, initial_parameters: list[Parameter], complexity_level: FactorLevel) -> Parameter:
+    def update_parameters(
+        self, initial_parameters: list[Parameter], complexity_level: FactorLevel
+    ) -> tuple[list[Parameter], float]:
+
         parameters = copy(initial_parameters)
 
-        deviating_multiplier = np.random.lognormal(0, complexity_level.value)
-        increasing_multiplier = deviating_multiplier if deviating_multiplier > 1 else 1.0 / deviating_multiplier
+        error_magnitude = np.random.lognormal(0, complexity_level.value)
+        increasing_multiplier = error_magnitude if error_magnitude > 1 else 1.0 / error_magnitude
         decreasing_multiplier = 1.0 / increasing_multiplier
-        print(deviating_multiplier)
+
         for i, parameter in enumerate(parameters):
             error_multiplier = None
             if parameter.name in self.deviating_parameters:
-                error_multiplier = deviating_multiplier
+                error_multiplier = error_magnitude
             elif parameter.name in self.increasing_parameters:
                 error_multiplier = increasing_multiplier
             elif parameter.name in self.decreasing_parameters:
@@ -44,7 +47,7 @@ class Scenario:
             updated_parameter = dataclasses.replace(parameter)
             updated_parameter.value *= error_multiplier
             parameters[i] = updated_parameter
-        return parameters
+        return parameters, error_magnitude
 
     @classmethod
     def parse_from_file(cls, scenario_file_path: str) -> list[Scenario]:

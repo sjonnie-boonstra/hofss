@@ -59,7 +59,7 @@ class Structure:
         self._failure_modes = list(values)
         return
 
-    def update_parameters(self, task_result: pd.Series) -> None:
+    def update_parameters(self, task_result: pd.Series) -> tuple[float, None]:
         """updates the parameters according to the provided scnario
 
         Args:
@@ -67,13 +67,13 @@ class Structure:
         """
         scenario: Scenario = task_result["scenario"]
         if task_result["scenario"] is None:
-            return
+            return None
 
         complexity_level: FactorLevel = task_result["complexity_level"]
 
         # use the scenario to update this structure's prameters
-        self.parameters = scenario.update_parameters(self.parameters, complexity_level)
-        return
+        self.parameters, error_magnitude = scenario.update_parameters(self.parameters, complexity_level)
+        return error_magnitude
 
     def draw_parameter_values(self, n: int = 1) -> dict[str, list[float]]:
         """draws parameter values for this structures from this structure's
