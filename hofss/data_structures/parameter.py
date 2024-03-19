@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 import numpy as np
 
@@ -25,7 +26,16 @@ class Parameter:
         Returns:
             np.ndarray[float]: a numpy array of n-values drawn for this parameter
         """
-        return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
+        if self.distribution_function.__name__ == "lognormal":
+            mu = math.log(self.value**2 / math.sqrt(self.value**2 + self.standard_deviation**2))
+            sigma = math.sqrt(math.log(1 + (self.standard_deviation**2) / (self.value**2)))
+            return np.array(self.distribution_function(mu, sigma, int(n)))
+        elif self.distribution_function.__name__ == "gamma":
+            k = self.value ** 2 / self.standard_deviation ** 2
+            theta = self.standard_deviation ** 2 / self.value
+            return np.array(self.distribution_function(k, theta, int(n)))
+        else:
+            return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
 
     def update_rng(self, rng: np.random.Generator):
         """updates the Random Number Generator (RNG) of the distribution function
