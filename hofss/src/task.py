@@ -87,17 +87,21 @@ class Task:
         self._scenarios = scenario_probabilities
         return
 
-    def determine_hep(self) -> pd.Series:
+    def determine_hep(self, rng: np.random.Generator = None) -> pd.Series:
         """determines the Human Error Probability (HEP) for this task given the task's factors
 
         Returns:
             float: the probability that this task leads to a human error
         """
+
+        if rng is None:
+            rng = np.random.default_rng()
+
         hep_data = {}
         multiplier_values = []
         complexity_level = None
         for factor in self.task_type.factors:
-            factor_multiplier, factor_level = factor.draw_multiplier()
+            factor_multiplier, factor_level = factor.draw_multiplier(rng)
             hep_data[f"{factor.name}_multiplier"] = factor_multiplier
             multiplier_values.append(factor_multiplier)
             if "complexity" in factor.description:
@@ -114,7 +118,7 @@ class Task:
         hep_data["hep"] = hep
         return hep_data
 
-    def do_task(self) -> pd.Series:
+    def do_task(self, rng: np.random.Generator = None) -> pd.Series:
         """performs the task: first determines the Human Error Probability (HEP); if an error occurs resolves
         if the error is found and consequently fixed; if the error is not fixed, determines the scenario that
         arises from the human error and returns this scenario
@@ -122,6 +126,10 @@ class Task:
         Returns:
             None | Scenario: the scenario if an error occurs, None if no error occurs or if it is found and corrected
         """
+
+        if rng is None:
+            rng = np.random.default_rng()
+
         # initiate task result dict with default values
         task_result = {
             "task": self.name, "human_error_occured": False, "error_discovered": False, "error_corrected": False,
@@ -129,29 +137,29 @@ class Task:
         }
 
         # determine the HEP
-        hep_data = self.determine_hep()
+        hep_data = self.determine_hep(rng=rng)
         task_hep = hep_data["hep"]
         task_result.update(hep_data)
 
         # determine if human error occurs or not
-        if task_hep < random.uniform(0, 1):
+        if task_hep < rng.uniform(0, 1):
             return pd.Series(task_result)  # no human error occurs
 
         # if this code is reached, a human error occurred
         task_result["human_error_occured"] = True
 
         # determine if a check resolves the error
-        human_error_discovered = 0.8 >= random.uniform(0, 1)
+        human_error_discovered = 0.8 >= rng.uniform(0, 1)
         task_result["error_discovered"] = human_error_discovered
         if human_error_discovered:
-            human_error_corrected = 0.9 >= random.uniform(0, 1)
+            human_error_corrected = 0.9 >= rng.uniform(0, 1)
             task_result["error_corrected"] = human_error_corrected
             if human_error_corrected:
                 return pd.Series(task_result)
 
         # if this code is reached, the human error was not corrected
         # determine scenario
-        scenario_draw = random.uniform(0, 1)
+        scenario_draw = rng.uniform(0, 1)
         probability_sum = 0
         scenario = None
         for scenario, probability in zip(self.scenarios, self.scenario_probabilities):

@@ -13,7 +13,7 @@ class Parameter:
     "the (nominal) value of the parameter"
     standard_deviation: float
     "the standard deviation of the parameter"
-    distribution_function: callable = np.random.normal
+    distribution_function: callable = None
     "the distribution function of the parameter, expected arguments: mean, standard_deviation, number_of_draws (default=1)"
 
     def draw(self, n: int) -> np.ndarray:
@@ -26,3 +26,13 @@ class Parameter:
             np.ndarray[float]: a numpy array of n-values drawn for this parameter
         """
         return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
+
+    def update_rng(self, rng: np.random.Generator):
+        """updates the Random Number Generator (RNG) of the distribution function
+
+        Args:
+            rng (np.random.Generator): the random number generator to assign to the distribution function
+        """
+        function_name = self.distribution_function.__name__
+        self.distribution_function = getattr(rng, function_name)
+        return

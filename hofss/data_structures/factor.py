@@ -74,7 +74,7 @@ class Factor:
         multiplier_value = [self.m_neg_lower, self.m_neg_5, self.m_neg_50, self.m_neg_95, self.m_neg_upper]
         return np.interp(p, p_values, multiplier_value)
 
-    def draw_multiplier(self) -> float:
+    def draw_multiplier(self, rng: np.random.Generator = None) -> float:
         """draws a multiplier for this factor.
 
         First it determines if the effect is positive or negative, then a multiplier is drawn
@@ -83,8 +83,11 @@ class Factor:
         Returns:
             float: the drawn multiplier.
         """
-        effect_draw = random.uniform(0, 1)
-        multiplier_draw = random.uniform(0, 1)
+        if rng is None:
+            rng = np.random.default_rng()
+
+        effect_draw = rng.uniform(0, 1)
+        multiplier_draw = rng.uniform(0, 1)
 
         factor_level = None
         if multiplier_draw < 0.05:

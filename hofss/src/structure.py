@@ -1,5 +1,6 @@
 from __future__ import annotations
 import os
+import copy
 from typing import Iterable, Callable
 import numpy as np
 import pandas as pd
@@ -59,12 +60,15 @@ class Structure:
         self._failure_modes = list(values)
         return
 
-    def update_parameters(self, task_result: pd.Series) -> tuple[float, None]:
+    def update_parameters(self, task_result: pd.Series, rng: np.random.Generator = None) -> tuple[float, None]:
         """updates the parameters according to the provided scnario
 
         Args:
             scenario (Scenario): the scenario that happened after a human error has occured
         """
+        if rng is None:
+            rng = np.random.default_rng()
+
         scenario: Scenario = task_result["scenario"]
         if task_result["scenario"] is None:
             return None
@@ -72,7 +76,7 @@ class Structure:
         complexity_level: FactorLevel = task_result["complexity_level"]
 
         # use the scenario to update this structure's prameters
-        self.parameters, error_magnitude = scenario.update_parameters(self.parameters, complexity_level)
+        self.parameters, error_magnitude = scenario.update_parameters(self.parameters, complexity_level, rng)
         return error_magnitude
 
     def draw_parameter_values(self, n: int = 1) -> dict[str, list[float]]:
@@ -122,9 +126,20 @@ class Structure:
 
         return pd.Series(failure_probability_by_mode)
 
+    def make_copy(self, rng: np.random.Generator = None) -> Structure:
+
+        if rng is None:
+            rng = np.random.default_rng()
+
+        result = copy.copy(self)
+        for parameter in result.parameters:
+            parameter.update_rng(rng)
+
+        return result
+
     @classmethod
     def parse_from_file(
-        cls, structure_file_path: str, failure_functions: list[callable] = failure_mode_functions
+        cls, structure_file_path: str, failure_functions: list[callable] = failure_mode_functions, seed: int = None
     ) -> Structure:
         """parses a structure from a file.
 
@@ -163,9 +178,10 @@ class Structure:
                 if failure_mode_function is None:
                     raise RuntimeError(f"unable to find function for failure mechanism: {failure_mechanism}")
                 structure_failure_modes[failure_mechanism] = failure_mode_function
+            rng = np.random.default_rng(seed)
             parameters.append(Parameter(
                 name=index, value=row["mean"], standard_deviation=row["standard_deviation"],
-                distribution_function=getattr(np.random, row["distribution_type"])
+                distribution_function=getattr(rng, row["distribution_type"])
             ))
 
         structure = cls(

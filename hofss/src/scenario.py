@@ -23,12 +23,15 @@ class Scenario:
         return
 
     def update_parameters(
-        self, initial_parameters: list[Parameter], complexity_level: FactorLevel
+        self, initial_parameters: list[Parameter], complexity_level: FactorLevel, rng: np.random.Generator = None
     ) -> tuple[list[Parameter], float]:
+
+        if rng is None:
+            rng = np.random.default_rng
 
         parameters = copy(initial_parameters)
 
-        error_magnitude = np.random.lognormal(0, complexity_level.value)
+        error_magnitude = rng.lognormal(0, complexity_level.value)
         increasing_multiplier = error_magnitude if error_magnitude > 1 else 1.0 / error_magnitude
         decreasing_multiplier = 1.0 / increasing_multiplier
 
