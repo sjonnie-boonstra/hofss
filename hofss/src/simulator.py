@@ -3,7 +3,6 @@ import os
 import re
 import numpy as np
 import pandas as pd
-from copy import copy
 
 from .task import Task
 from .structure import Structure
@@ -28,7 +27,10 @@ class Simulator:
         else:
             return (s, None, None)
 
-    def simulate(self, seed: int, number_of_parameter_draws: int = 1e8) -> pd.Dataframe:
+    def simulate(
+        self, seed: int, number_of_parameter_draws: int = 1e8,
+        parameter_draw_batch_size: int = 1e6, initial_failure_probabilities: dict[str: float] = None
+    ) -> pd.Dataframe:
 
         # create a random number generator
         rng = np.random.default_rng(seed)
@@ -37,10 +39,12 @@ class Simulator:
         structure_copy = self.structure.make_copy(rng)
 
         # run the simulation
-        failure_probabilities = structure_copy.calculate_failure_probabilities(
-            number_of_iterations=number_of_parameter_draws
-        )
-        failure_probabily_rows = [failure_probabilities]
+        if initial_failure_probabilities is None:
+            initial_failure_probabilities = structure_copy.calculate_failure_probabilities(
+                number_of_parameter_draws, parameter_draw_batch_size
+            )
+        failure_probabily_rows = [initial_failure_probabilities]
+        failure_probabilities = initial_failure_probabilities
         for task in self.tasks:
             task_result = task.do_task(rng=rng)
             task_result["error_magnitude"] = None

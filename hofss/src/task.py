@@ -111,9 +111,12 @@ class Task:
             raise RuntimeError("unable to determine complexity level when determining HEP")
         hep_data["complexity_level"] = complexity_level
 
-        multipliers_values = np.array(multiplier_values)
-        composite_multiplier = multipliers_values.prod()**(1.0/len(multipliers_values))
-        hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
+        multiplier_values = np.array(multiplier_values)
+        # composite_multiplier = multiplier_values.prod()**(1.0/len(multiplier_values))
+        # hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
+
+        hep = min(multiplier_values) * max(multiplier_values) * self.task_type.nhep
+        # hep = np.product(multiplier_values) * self.task_type.nhep / float(len(multiplier_values))
 
         hep_data["hep"] = hep
         return hep_data

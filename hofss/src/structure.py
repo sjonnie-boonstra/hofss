@@ -92,7 +92,9 @@ class Structure:
         """
         return {p.name: p.draw(n) for p in self.parameters}
 
-    def calculate_failure_probabilities(self, number_of_iterations: int = 1e6) -> dict[str, float]:
+    def calculate_failure_probabilities(
+        self, number_of_iterations: int = 1e6, parameter_draw_batch_size: int = 1e6
+    ) -> dict[str, float]:
         """calculates the failure probabilities for each failure mode through a Monte Carlo simulation
 
         Args:
@@ -105,24 +107,31 @@ class Structure:
             dict[str, float]: a dictionary with the failure probability per failure mode
         """
 
-        # draw the parameter values
-        parameter_values = self.draw_parameter_values(number_of_iterations)
+        number_of_total_draws = 0
+        number_of_failures_by_mode = {failure_mode.__name__: 0 for failure_mode in self.failure_modes}
+        total_number_of_failures = 0
+        while number_of_total_draws < number_of_iterations:
+            number_of_draws = min(parameter_draw_batch_size, number_of_iterations - number_of_total_draws)
+            number_of_total_draws += number_of_draws
 
-        # determine if failure occured per iteration and per failure mode, and calculate the
-        # failure probability per mode and for the total
-        failures_by_mode = {}
-        total_failure = None
-        for failure_mode in self.failure_modes:
-            failure_criteria = failure_mode(**parameter_values)
-            failure_occured = failure_criteria < 0
-            failures_by_mode[failure_mode.__name__] = np.sum(failure_occured, axis=0)
-            if total_failure is None:
-                total_failure = failure_occured
-            else:
-                total_failure = np.logical_or(total_failure, failure_occured)
+            # draw the parameter values
+            parameter_values = self.draw_parameter_values(number_of_draws)
 
-        failures_by_mode["total"] = np.sum(total_failure, axis=0)
-        failure_probability_by_mode = {k: v / number_of_iterations for k, v in failures_by_mode.items()}
+            # determine if failure occured per iteration and per failure mode, and calculate the
+            # failure probability per mode and for the total
+            total_failure = None
+            for failure_mode in self.failure_modes:
+                failure_criteria = failure_mode(**parameter_values)
+                failure_occured = failure_criteria < 0
+                number_of_failures_by_mode[failure_mode.__name__] += np.sum(failure_occured, axis=0)
+                if total_failure is None:
+                    total_failure = failure_occured
+                else:
+                    total_failure = np.logical_or(total_failure, failure_occured)
+            total_number_of_failures += np.sum(total_failure)
+
+        number_of_failures_by_mode["total"] = total_number_of_failures
+        failure_probability_by_mode = {k: v / number_of_iterations for k, v in number_of_failures_by_mode.items()}
 
         return pd.Series(failure_probability_by_mode)
 
