@@ -26,6 +26,8 @@ class Parameter:
         Returns:
             np.ndarray[float]: a numpy array of n-values drawn for this parameter
         """
+        if self.standard_deviation == 0:
+            return self.value
         if self.distribution_function.__name__ == "lognormal":
             mu = math.log(self.value**2 / math.sqrt(self.value**2 + self.standard_deviation**2))
             sigma = math.sqrt(math.log(1 + (self.standard_deviation**2) / (self.value**2)))
@@ -34,6 +36,9 @@ class Parameter:
             k = self.value ** 2 / self.standard_deviation ** 2
             theta = self.standard_deviation ** 2 / self.value
             return np.array(self.distribution_function(k, theta, int(n)))
+        elif self.distribution_function.__name__ == "exponential":
+
+            return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
         else:
             return np.array(self.distribution_function(self.value, self.standard_deviation, int(n)))
 

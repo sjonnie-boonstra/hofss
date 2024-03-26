@@ -21,7 +21,7 @@ class Simulator:
 
     @staticmethod
     def _data_column_sort_key(s):
-        re_result = re.match(r"(\D*)(\d*)(\D*)", s)
+        re_result = re.match(r"(\D*)(\d+)(\D*)", s)
         if re_result:
             return (re_result.group(1), int(re_result.group(2)), re_result.group(3))
         else:
@@ -48,11 +48,13 @@ class Simulator:
         for task in self.tasks:
             task_result = task.do_task(rng=rng)
             task_result["error_magnitude"] = None
+            task_result["mutated_parameter"] = None
 
             # if no error occured during this task, continue to the next task
             if task_result["scenario"] is not None:
-                error_magnitude = structure_copy.update_parameters(task_result, rng)
+                mutated_parameter, error_magnitude = structure_copy.update_parameters(task_result, rng)
                 task_result["error_magnitude"] = error_magnitude
+                task_result["mutated_parameter"] = mutated_parameter
                 failure_probabilities = structure_copy.calculate_failure_probabilities(
                     number_of_iterations=number_of_parameter_draws
                 )
@@ -65,14 +67,13 @@ class Simulator:
         # sort the columns in a way that is more convenient to read
         sorted_columns = [
             "task", "human_error_occured", "error_discovered", "error_corrected", "scenario",
-            "complexity_level", "error_magnitude", "hep", "bendingMomentULS", "total"
+            "complexity_level", "mutated_parameter", "error_magnitude", "hep", "bendingMomentULS", "total"
         ]
         other_columns = []
         for column in collective_df.columns:
             if column in sorted_columns:
                 continue
             other_columns.append(column)
-
         sorted_columns.extend(sorted(other_columns, key=self._data_column_sort_key))
         collective_df = collective_df[sorted_columns]
 

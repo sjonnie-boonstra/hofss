@@ -17,9 +17,11 @@ class Scenario:
     ) -> None:
         self.name = name
         self.description = description
-        self.increasing_parameters = increasing_parameters
-        self.decreasing_parameters = decreasing_parameters
-        self.deviating_parameters = deviating_parameters
+        self.possible_parameter_mutation = [
+            *[("increase", parameter) for parameter in increasing_parameters],
+            *[("decrease", parameter) for parameter in decreasing_parameters],
+            *[("", parameter) for parameter in deviating_parameters],
+        ]
         return
 
     def update_parameters(
@@ -32,25 +34,22 @@ class Scenario:
         parameters = copy(initial_parameters)
 
         error_magnitude = rng.lognormal(0, complexity_level.value)
-        increasing_multiplier = error_magnitude if error_magnitude > 1 else 1.0 / error_magnitude
-        decreasing_multiplier = 1.0 / increasing_multiplier
+        mutation, mutated_parameter = rng.choice(self.possible_parameter_mutation)
+        if mutation == "increase" and error_magnitude < 1.0:
+            error_magnitude = 1 / error_magnitude
+        elif mutation == "decrase" and error_magnitude > 1.0:
+            error_magnitude = 1 / error_magnitude
 
         for i, parameter in enumerate(parameters):
-            error_multiplier = None
-            if parameter.name in self.deviating_parameters:
-                error_multiplier = error_magnitude
-            elif parameter.name in self.increasing_parameters:
-                error_multiplier = increasing_multiplier
-            elif parameter.name in self.decreasing_parameters:
-                error_multiplier = decreasing_multiplier
-            else:
+            if parameter.name != mutated_parameter:
                 continue
 
             # update the parameter
             updated_parameter = dataclasses.replace(parameter)
-            updated_parameter.value *= error_multiplier
+            updated_parameter.value *= error_magnitude
             parameters[i] = updated_parameter
-        return parameters, error_magnitude
+            break
+        return parameters, mutated_parameter, error_magnitude
 
     @classmethod
     def parse_from_file(cls, scenario_file_path: str) -> list[Scenario]:
@@ -59,11 +58,14 @@ class Scenario:
 
         scenarios = []
         for _, row in scenario_data.iterrows():
+            increasing_parameters = [p for p in row["increasing_parameters"].split(";") if p.strip() != ""]
+            decreasing_parameters = [p for p in row["decreasing_parameters"].split(";") if p.strip() != ""]
+            deviating_parameters = [p for p in row["deviating_parameters"].split(";") if p.strip() != ""]
             scenarios.append(cls(
                 name=row["name"], description=row["description"],
-                increasing_parameters=row["increasing_parameters"].split(";"),
-                decreasing_parameters=row["decreasing_parameters"].split(";"),
-                deviating_parameters=row["deviating_parameters"].split(";")
+                increasing_parameters=increasing_parameters,
+                decreasing_parameters=decreasing_parameters,
+                deviating_parameters=deviating_parameters
             ))
 
         return scenarios

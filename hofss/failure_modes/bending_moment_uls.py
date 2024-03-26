@@ -28,9 +28,9 @@ def bendingMomentULS(
     Returns:
         float: the failure criterion
     """
-    # NB, capacity and resitance ar calculated per m of floor
-    N_s = A_s * f_yd
-    x_u = N_s / (alpha * f_cd * 1e3)  # 1e3 is the width of the 'beam', i.e. 1m of floor
-    M_rd = theta_R * N_s * (h - c - diam / 2.0 - beta * x_u)
-    M_ed = theta_E * (1000 * (p_G + p_d) * L**2) / 8.0
-    return M_rd - M_ed
+    # NB, capacity and occuring_load ar calculated per m of floor
+    a = c + diam / 2.0
+    g = 25e-9 * h * b
+    capacity = theta_R * A_s * f_yd * (h - a - 0.5 * A_s * f_yd / (f_cd * b))
+    occuring_load = theta_E * b * (g + p_d + p_G) * L ** 2 / 8.0
+    return capacity - occuring_load

@@ -1,6 +1,7 @@
 from __future__ import annotations
 import os
 import copy
+import dataclasses
 from typing import Iterable, Callable
 import numpy as np
 import pandas as pd
@@ -71,13 +72,15 @@ class Structure:
 
         scenario: Scenario = task_result["scenario"]
         if task_result["scenario"] is None:
-            return None
+            return None, None
 
         complexity_level: FactorLevel = task_result["complexity_level"]
 
         # use the scenario to update this structure's prameters
-        self.parameters, error_magnitude = scenario.update_parameters(self.parameters, complexity_level, rng)
-        return error_magnitude
+        self.parameters, mutated_parameter, error_magnitude = scenario.update_parameters(
+            self.parameters, complexity_level, rng
+        )
+        return mutated_parameter, error_magnitude
 
     def draw_parameter_values(self, n: int = 1) -> dict[str, list[float]]:
         """draws parameter values for this structures from this structure's
@@ -141,8 +144,10 @@ class Structure:
             rng = np.random.default_rng()
 
         result = copy.copy(self)
-        for parameter in result.parameters:
+        for i, parameter in enumerate(result.parameters):
+            parameter = dataclasses.replace(parameter)
             parameter.update_rng(rng)
+            result.parameters[i] = parameter
 
         return result
 

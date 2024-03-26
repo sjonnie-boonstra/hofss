@@ -112,10 +112,11 @@ class Task:
         hep_data["complexity_level"] = complexity_level
 
         multiplier_values = np.array(multiplier_values)
-        # composite_multiplier = multiplier_values.prod()**(1.0/len(multiplier_values))
+        composite_multiplier = multiplier_values.prod()**(1.0/len(multiplier_values))
+        hep = composite_multiplier * self.task_type.nhep
         # hep = (self.task_type.nhep * composite_multiplier) / (self.task_type.nhep * (composite_multiplier - 1) + 1)
 
-        hep = min(multiplier_values) * max(multiplier_values) * self.task_type.nhep
+        # hep = min(multiplier_values) * max(multiplier_values) * self.task_type.nhep
         # hep = np.product(multiplier_values) * self.task_type.nhep / float(len(multiplier_values))
 
         hep_data["hep"] = hep

@@ -4,6 +4,7 @@ import time
 import logging
 import threading
 import queue
+from traceback import format_exc
 
 from hofss import Simulator
 logging.basicConfig(level=logging.INFO)
@@ -11,11 +12,11 @@ logging.basicConfig(level=logging.INFO)
 
 # input
 input_directory = "data"
-output_directory = "results"
-number_of_simulations = 10
-number_of_parameter_draws = 1e7
-parameter_draw_batch_size = 1e7
-number_of_threads = 3
+output_directory = "/home/boonstra/xin_results_25_3_no_error_check"
+number_of_simulations = int(1e5)
+number_of_parameter_draws = 5e6
+parameter_draw_batch_size = 5e6
+number_of_threads = 5
 
 # preparation
 simulator = Simulator.parse_from_directory(input_directory)
@@ -29,7 +30,10 @@ end = time.time()
 print(f"time: {end-start} seconds")
 
 
+start = time.time()
 # function that each worker will call to do a simulation
+
+
 def do_simulation(worker_id, queue):
     while True:  # keep doing this until the thread is killed
         seed, output_file = queue.get()
@@ -44,8 +48,8 @@ def do_simulation(worker_id, queue):
         except Exception as err:
             error_file = os.path.join(output_directory, f"{seed}.log")
             logging.warning(f"worker: '{worker_id}' failure on seed: {seed}. Check: {error_file}")
-            with open(error_file) as err_f:
-                err_f.write(str(err))
+            with open(error_file, "w") as err_f:
+                err_f.write(format_exc())
         else:
             logging.info(f"worker: '{worker_id}' success on seed: {seed}")
 
@@ -70,3 +74,6 @@ for worker_id in range(1, number_of_threads+1):
 
 # Block until all tasks are done
 input_queue.join()  # kills all thread when the queue is empty
+
+end = time.time()
+print(f"time: {end-start} seconds")
