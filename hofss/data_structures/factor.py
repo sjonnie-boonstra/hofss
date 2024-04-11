@@ -71,7 +71,7 @@ class Factor:
         if p < 0 or p > 1:
             raise ValueError(f"p must lie between 0 and 1, received value: {p}")
         p_values = [0, 0.05, 0.5, 0.95, 1]
-        multiplier_value = [self.m_neg_lower, self.m_neg_5, self.m_neg_50, self.m_neg_95, self.m_neg_upper]
+        multiplier_value = [self.m_pos_lower, self.m_pos_5, self.m_pos_50, self.m_pos_95, self.m_pos_upper]
         return np.interp(p, p_values, multiplier_value)
 
     def draw_multiplier(self, rng: np.random.Generator = None) -> float:

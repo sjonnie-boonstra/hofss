@@ -31,7 +31,7 @@ D23,D23-S2,Calculate required reinforcment area lower,,A_s,
 D27,D27-S1,Choose practical value higher than As,A_s,,
 D27,D27-S2,Choose practical value lower than As,,A_s,
 D28,D28-S1,Check wrong (As<As_max) increase floor height or concrete quality,f_cd,,
-D28,D28-S2,Check right (As>As_max) but not increase floor height or concrete quality,,,
+D28,D28-S2,Check right (As>As_max) but not increase floor height or concrete quality,,f_cd,
 D33,D33-S1,Calculate moment resistance higher,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R,,
 D33,D33-S2,Calculate moment resistance lower,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R,
 D42,D42-S1,Draw floor plan and sections wrong,,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R

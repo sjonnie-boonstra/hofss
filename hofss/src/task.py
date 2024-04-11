@@ -118,6 +118,7 @@ class Task:
 
         # hep = min(multiplier_values) * max(multiplier_values) * self.task_type.nhep
         # hep = np.product(multiplier_values) * self.task_type.nhep / float(len(multiplier_values))
+        # hep = np.product(multiplier_values) * self.task_type.nhep
 
         hep_data["hep"] = hep
         return hep_data
@@ -135,10 +136,7 @@ class Task:
             rng = np.random.default_rng()
 
         # initiate task result dict with default values
-        task_result = {
-            "task": self.name, "human_error_occured": False, "error_discovered": False, "error_corrected": False,
-            "scenario": None
-        }
+        task_result = {"task": self.name, "scenario": None}
 
         # determine the HEP
         hep_data = self.determine_hep(rng=rng)
@@ -149,20 +147,7 @@ class Task:
         if task_hep < rng.uniform(0, 1):
             return pd.Series(task_result)  # no human error occurs
 
-        # if this code is reached, a human error occurred
-        task_result["human_error_occured"] = True
-
-        # determine if a check resolves the error
-        human_error_discovered = 0.8 >= rng.uniform(0, 1)
-        task_result["error_discovered"] = human_error_discovered
-        if human_error_discovered:
-            human_error_corrected = 0.9 >= rng.uniform(0, 1)
-            task_result["error_corrected"] = human_error_corrected
-            if human_error_corrected:
-                return pd.Series(task_result)
-
-        # if this code is reached, the human error was not corrected
-        # determine scenario
+        # if this code is reached, the human error has occured, determin scenario
         scenario_draw = rng.uniform(0, 1)
         probability_sum = 0
         scenario = None

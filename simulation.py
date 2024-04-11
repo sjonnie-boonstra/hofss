@@ -12,22 +12,22 @@ logging.basicConfig(level=logging.INFO)
 
 # input
 input_directory = "data"
-output_directory = "/home/boonstra/xin_results_25_3_no_error_check"
+output_directory = "/home/boonstra/24_04_11_with_checks"
 number_of_simulations = int(1e5)
 number_of_parameter_draws = 5e6
 parameter_draw_batch_size = 5e6
 number_of_threads = 5
 
 # preparation
-simulator = Simulator.parse_from_directory(input_directory)
+simulator = Simulator.parse_from_directory(input_directory, include_check=True)
 os.makedirs(output_directory, exist_ok=True)
 
 start = time.time()
 initial_failure_probabilities = simulator.structure.calculate_failure_probabilities(
-    number_of_parameter_draws, parameter_draw_batch_size
+    1e8, 1e7
 )
 end = time.time()
-print(f"time: {end-start} seconds")
+logging.info(f"determined initial failure probabilities ({end-start} seconds)\n:{initial_failure_probabilities}")
 
 
 start = time.time()

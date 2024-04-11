@@ -1,25 +1,21 @@
 import os
+import pandas as pd
 
 from hofss import Simulator
 
 
 # input
 input_directory = "data"
-output_directory = "/home/boonstra/xin_results_23_3"
-number_of_parameter_draws = 1e8
-parameter_draw_batch_size = 1e7
+output_directory = "/home/boonstra/test"
+number_of_parameter_draws = 5e6
+parameter_draw_batch_size = 5e6
 
 # preparation
-simulator = Simulator.parse_from_directory(input_directory)
-os.makedirs(output_directory, exist_ok=True)
+simulator = Simulator.parse_from_directory(input_directory, include_check=False)
 
-initial_failure_probabilities = simulator.structure.calculate_failure_probabilities(
-    number_of_parameter_draws, parameter_draw_batch_size
+initial_failure_probabilities = simulator.structure.calculate_failure_probabilities(1e6, 1e6)
+
+simulation_data: pd.DataFrame = simulator.simulate(
+    2, number_of_parameter_draws, parameter_draw_batch_size, initial_failure_probabilities
 )
-
-print(initial_failure_probabilities)
-# simulation_data = simulator.simulate(
-#     86, number_of_parameter_draws, parameter_draw_batch_size, initial_failure_probabilities
-# )
-
-# print(simulation_data["total"][-1])
+simulation_data.to_csv("test.csv", index=False)
