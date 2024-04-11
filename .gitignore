@@ -157,4 +157,5 @@ output_*/
 input_*/
 *_temp/
 
+*.png
 results/
