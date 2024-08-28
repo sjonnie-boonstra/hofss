@@ -3,7 +3,7 @@ This is the code used for modelling HOFs in the PhD research by Xin Ren.
 
 
 ## Cite this work
-'''latex
+'''
 @software{
   ren2024hofss,
   author = {Ren, X and Boonstra S},
