@@ -6,7 +6,7 @@ This is the code used for modelling HOFs in the PhD research by Xin Ren.
 '''
 @software{
   ren2024hofss,
-  author = {Ren, X and Boonstra S},
+  author = {Ren, X and Boonstra, S},
   title = {{HOFSS}: human and organizational factors structure safety},
   url = {\url{https://gitlab.tudelft.nl/xinren/hofss}},
   version = {1.0},
