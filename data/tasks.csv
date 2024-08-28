@@ -1,0 +1,30 @@
+task_name,task_content,task_type,scenarios_and_probabilities
+D1,Determine slab span,T1,D1-S1&0.5;D1-S2&0.5
+D3,Determine structural scheme,T4,D3-S1&1
+D7,Exposure classification and durability requirements,T2,D7-S1&0.5;D7-S2&0.5
+D10,Determine critical load case,T4,D10-S1&0.5;D10-S2&0.5
+D12,Determine loads combination partial safety factor,T1,D12-S1&0.5;D12-S2&0.5
+D13,Determine concrete quality,T3,D13-S1&0.5;D13-S2&0.5
+D14,Determine steel quality,T3,D14-S1&0.5;D14-S2&0.5
+D15,Determine material strength partial safety factor,T1,D15-S1&0.5;D15-S2&0.5
+D16,Determine slab height with design rule,T1,D16-S1&0.5;D16-S2&0.5
+D17,Calculate self weight,T5,D17-S1&0.5;D17-S2&0.5
+D18,Calculate design moment,T5,D18-S1&0.5;D18-S2&0.5
+D20,Assume reinforcement diameter,T1,D20-S1&0.5;D20-S2&0.5
+D21,Determine concrete cover,T1,D21-S1&0.5;D21-S2&0.5
+D22,Estimate effective height,T1,D22-S1&0.5;D22-S2&0.5
+D23,Calculate required reinforcement area,T5,D23-S1&0.5;D23-S2&0.5
+D27,Round up As to a practical value,T3,D27-S1&0.5;D27-S2&0.5
+D28,Check maximum reinforcement area if necessary increase floor height or concrete quality,T6,D28-S1&0.5;D28-S2&0.5
+D33,Calculate moment resistance,T5,D33-S1&0.5;D33-S2&0.5
+D42,Draw floor plan and sections,T7,D42-S1&1
+D51,Write floor specifications and installation instructions,T8,D51-S1&1
+D57,design briefing  to main contractor,T13,D57-S1&1
+C1,Consult design and specifications,T10,C1-S1&1
+C2,Set out dimensions,T11,C2-S1&1
+C3,Placing temporary struts and moulds,T9,C3-S1&1
+C4,Placing bottom reinforcement and top reinforcement with distance holders,T9,C4-S1&0.25;C4-S2&0.25;C4-S3&0.25;C4-S4&0.25
+C5,Prepare concrete mix,T12,C5-S1&0.5;C5-S2&0.5
+C6,Cast concrete,T12,C6-S1&0.5;C6-S2&0.5
+C7,Cure concrete,T9,C7-S1&1
+C8,Remove temporary struts and moulds,T9,C8-S1&1

@@ -1,0 +1,15 @@
+parameter,failure_mechanisms,mean,standard_deviation,distribution_type
+p_d,[bendingMomentULS],0.0002,0.00046,gamma
+L,[bendingMomentULS],5000,0,normal
+b,[bendingMomentULS],1000,0,normal
+f_cd,[bendingMomentULS],30,5,lognormal
+f_yd,[bendingMomentULS],560,30,lognormal
+alpha,[bendingMomentULS],0.75,0,normal
+beta,[bendingMomentULS],0.3889,0,normal
+h,[bendingMomentULS],200,5,normal
+p_G,[bendingMomentULS],0.0005,0.00075,gamma
+c,[bendingMomentULS],25,5,gamma
+diam,[bendingMomentULS],10,0,normal
+A_s,[bendingMomentULS],524,0,normal
+theta_R,[bendingMomentULS],1.1,0.077,lognormal
+theta_E,[bendingMomentULS],1,0.2,lognormal

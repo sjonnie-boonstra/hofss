@@ -1,0 +1,52 @@
+task_name,name,description,increasing_parameters,decreasing_parameters,deviating_parameters
+D1,D1-S1,Design slab span longer than conceptual design,L,,
+D1,D1-S2,Design slab span shorter than conceptual design,,L,
+D3,D3-S1,Wrong boundary conditions,,,theta_E
+D7,D7-S1,Reliability index larger,theta_E,,
+D7,D7-S2,Reliability index smaller,,theta_E,
+D10,D10-S1,Design load case magnitude higher than reality,p_d,,
+D10,D10-S2,Design load case magnitude lower than reality,,p_d,
+D12,D12-S1,Choose a higher safety factor for a load case,theta_E,,
+D12,D12-S2,Choose a lower safety factor for a load case,,theta_E,
+D13,D13-S1,Choose higher concrete quality,f_cd,,
+D13,D13-S2,Choose lower concrete quality,,f_cd,
+D14,D14-S1,Choose higher steel quality,f_yd,,
+D14,D14-S2,Choose lower steel quality,,f_yd,
+D15,D15-S1,determine material strength partial safety factor higher,theta_R,,
+D15,D15-S2,determine material strength partial safety factorlower,,theta_R,
+D16,D16-S1,Estimate the height higher,h,,
+D16,D16-S2,Estimate the height lower,,h,
+D17,D17-S1,Calculate self weight higer,p_G,,
+D17,D17-S2,Calculate self weight lower,,p_G,
+D18,D18-S1,Calculate design moment higher,p_d,,
+D18,D18-S2,Calculate design moment lower,,p_d,
+D20,D20-S1,Assume reinforcement diameter higher,diam,,
+D20,D20-S2,Assume reinforcement diameter lower,,diam,
+D21,D21-S1,Determine concrete cover higher,c,,
+D21,D21-S2,Determine concrete cover lower,,c,
+D22,D22-S1,Estimate effective height higher,diam,,
+D22,D22-S2,Estimate effective height lower,,d,
+D23,D23-S1,Calculate required reinforcment area higher,A_s,,
+D23,D23-S2,Calculate required reinforcment area lower,,A_s,
+D27,D27-S1,Choose practical value higher than As,A_s,,
+D27,D27-S2,Choose practical value lower than As,,A_s,
+D28,D28-S1,Check wrong (As<As_max) increase floor height or concrete quality,f_cd,,
+D28,D28-S2,Check right (As>As_max) but not increase floor height or concrete quality,,f_cd,
+D33,D33-S1,Calculate moment resistance higher,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R,,
+D33,D33-S2,Calculate moment resistance lower,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R,
+D42,D42-S1,Draw floor plan and sections wrong,,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R
+D51,D51-S1,Write floor specifications and installation instructions wrong,,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R
+D57,D57-S1,design briefing  to main contractor contain error,,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R
+C1,C1-S1,Consult design and specifications wrongly,,,A_s;f_yd;h;c;diam;f_cd;L;p_G;p_d;theta_E;theta_R
+C2,C2-S1,Measure dimensions wrong,,,p_d
+C3,C3-S1,Placing temporary struts and moulds wrongly.,,,L;h;p_G
+C4,C4-S1,More reinforcement,A_s,,
+C4,C4-S2,Less reinforcement,,A_s,
+C4,C4-S3,Wrong distance between reinforcement,,,A_s
+C4,C4-S4,Wrong type of reinforcement,,,f_yd
+C5,C5-S1,Higher concrete strength,f_cd,,
+C5,C5-S2,Lower concrete strength,,f_cd,
+C6,C6-S1,Cast more concrete than required,p_G,,
+C6,C6-S2,Do not cast enough concrete,,h,
+C7,C7-S1,Wrong curing time or condition decrease concrete quality,,f_cd,
+C8,C8-S1,Remove temporary struts and moulds earlier than required,,f_cd,
